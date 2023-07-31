@@ -1,0 +1,15 @@
+image: $DOCKER_REGISTRY_PREFIX/2smart/utils/combined-ci-image:latest
+
+services:
+  - name: $DOCKER_REGISTRY_PREFIX/2smart/base-images/docker-dind
+    alias: docker
+
+stages:
+  - deploy
+
+demo:
+  stage: deploy
+  script:
+    - STAGE_HOST=$DEMO_HOST STAGE_USER=$DEMO_USER STAGE_KEY=$DEMO_KEY JOB_TOKEN=$CI_JOB_TOKEN REGISTRY=$CI_REGISTRY ./run_stage_deployment.sh
+  only:
+    - 'master'

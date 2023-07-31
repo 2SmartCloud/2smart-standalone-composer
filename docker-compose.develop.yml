@@ -1,0 +1,121 @@
+version: '3.4'
+services:
+  2smart-core:
+    restart: "no"
+    build:
+      context: ./../apps/core
+      dockerfile: Dockerfile.develop
+    environment:
+      - DB_TEST_USERNAME=2smart-test
+      - DB_TEST_PASSWORD=test-password
+      - DB_TEST_NAME=2smart_test
+      - REMOTE_BRIDGE_TYPES_SYNC_INTERVAL_SECONDS=${REMOTE_BRIDGE_TYPES_SYNC_INTERVAL_SECONDS}
+    volumes:
+      - ${ROOT_DIR_2SMART}/../apps/core:/app
+  2smart-emqx:
+    restart: "no"
+    build:
+      context: ./../services/emqx
+    ports:
+      - "8083:8083"
+      - "8084:8084"
+      - "18083:18083"
+      - "8080:8080"
+  2smart-ui:
+    restart: "no"
+    build:
+      context: ./../apps/ui
+      dockerfile: Dockerfile.develop
+    environment:
+      - DOCKER=true
+      - NODE_ENV=
+      - MQTT_CACHE_LIMIT=${MQTT_CACHE_LIMIT}
+    ports:
+      - "3000:3000"
+    volumes:
+      - ${ROOT_DIR_2SMART}/../apps/ui:/app
+  2smart-mysql:
+    restart: "no"
+    build:
+      context: ./../services/mysql
+    ports:
+      - "3306:3306"
+  client-dashboard-be:
+    restart: "no"
+    build:
+      context: ./../apps/be
+      dockerfile: Dockerfile.develop
+    environment:
+      - DB_TEST_USERNAME=2smart-test
+      - DB_TEST_PASSWORD=test-password
+      - DB_TEST_NAME=2smart_test
+      - TEST_JWT_TOKEN_SECRET=${TEST_JWT_TOKEN_SECRET}
+      - TEST_JWT_AUTO_EXIT_PIN_MAX_AGE=${TEST_JWT_AUTO_EXIT_PIN_MAX_AGE}
+      - TEST_JWT_TOKEN_PIN_MAX_AGE=${TEST_JWT_TOKEN_PIN_MAX_AGE}
+      - TEST_JWT_TOKEN_PASSWORD_MAX_AGE=${TEST_JWT_TOKEN_PASSWORD_MAX_AGE}
+      - MODE=development
+    volumes:
+      - ${ROOT_DIR_2SMART}/../apps/be:/app
+    ports:
+      - "8000:8000"
+  influxdb:
+    restart: "no"
+    build:
+      context: ./../services/influx
+    ports:
+      - "8086:8086"
+  time-series-service:
+    restart: "no"
+    build:
+      context: ./../apps/time-series
+      dockerfile: Dockerfile.develop
+    volumes:
+      - ${ROOT_DIR_2SMART}/../apps/time-series:/app
+  scenario-runner:
+    restart: "no"
+    build:
+      context: ./../apps/scenario-runner
+      dockerfile: Dockerfile.develop
+    environment:
+      - DB_TEST_USERNAME=2smart-test
+      - DB_TEST_PASSWORD=test-password
+      - DB_TEST_NAME=2smart_test
+    volumes:
+      - ${ROOT_DIR_2SMART}/../apps/scenario-runner:/app
+  ssl-certs:
+    restart: "no"
+    build:
+      context: ./../apps/ssl-certs
+  2smart-nginx:
+    restart: "no"
+    build:
+      context: ./../services/nginx
+  2smart-heartbeat:
+    restart: "no"
+    build:
+      context: ./../apps/heartbeat
+      dockerfile: Dockerfile.develop
+    volumes:
+      - ${ROOT_DIR_2SMART}/../apps/heartbeat:/app
+  2smart-filebeat:
+    restart: "no"
+    build:
+      context: ./../services/filebeat
+  backup-service:
+    restart: "no"
+    build:
+      context: ./../apps/backup
+      dockerfile: Dockerfile.develop
+    volumes:
+      - ${ROOT_DIR_2SMART}/../apps/backup:/app
+    ports:
+      - "9000:9000"
+  2smart-updater:
+    restart: "no"
+    build:
+      context: ./../apps/updater
+      dockerfile: Dockerfile.develop
+    volumes:
+      - ${ROOT_DIR_2SMART}/../apps/updater:/app
+    networks:
+      - app-network

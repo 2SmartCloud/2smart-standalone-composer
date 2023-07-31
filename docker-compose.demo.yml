@@ -1,0 +1,17 @@
+version: '3.4'
+
+services:
+  2smart-emqx:
+    ports:
+      - "18083:18083"
+  2smart-ui:
+    environment:
+      - NODE_ENV="demo"
+      - MQTT_CACHE_LIMIT=${MQTT_CACHE_LIMIT}
+  ssl-certs:
+    entrypoint: "/bin/sh -c 'echo STOP!'"
+  2smart-nginx:
+    volumes:
+      - ${ROOT_DIR_2SMART}/install_2smart.sh:/var/tmp/install_2smart.sh
+      - ${ROOT_DIR_2SMART}/system/data/nginx/conf.d:/etc/nginx/conf.d
+      - ${ROOT_DIR_2SMART}/system/releases:/var/tmp/releases

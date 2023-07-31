@@ -1,0 +1,42 @@
+version: '3.4'
+
+networks:
+  app-network:
+    driver: bridge
+
+services:
+  2smart-mysql-test:
+    image: 2smartdev/2smart-standalone-mysql-service:${TAG:-release}
+    container_name: 2smart-mysql-test
+    environment:
+      - MYSQL_DATABASE=${MYSQL_TEST_DATABASE}
+      - MYSQL_USER=${MYSQL_TEST_USER}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_TEST_ROOT_PASSWORD}
+      - MYSQL_PASSWORD=${MYSQL_TEST_PASSWORD}
+    networks:
+      - app-network
+
+  scenario-runner:
+    environment:
+      - DB_HOSTNAME=${MYSQL_TEST_HOST}
+      - DB_TEST_USERNAME=${MYSQL_TEST_USER}
+      - DB_TEST_PASSWORD=${MYSQL_TEST_PASSWORD}
+      - DB_TEST_NAME=${MYSQL_TEST_DATABASE}
+      - MODE=test
+    networks:
+      - app-network
+
+  client-dashboard-be:
+    restart: 'no'
+    depends_on:
+      - 2smart-mysql-test
+    environment:
+      - WAIT_HOSTS=${MYSQL_TEST_HOST}:3306
+      - MODE=test
+      - DB_HOSTNAME=${MYSQL_TEST_HOST}
+      - DB_TEST_USERNAME=${MYSQL_TEST_USER}
+      - DB_TEST_PASSWORD=${MYSQL_TEST_PASSWORD}
+      - DB_TEST_NAME=${MYSQL_TEST_DATABASE}
+    command: sh -c "/wait && npm run migration-test && npm start"
+    networks:
+      - app-network

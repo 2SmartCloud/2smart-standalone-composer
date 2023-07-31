@@ -1,0 +1,12 @@
+data
+emqx
+db
+influxdb
+grafana
+logs
+scenarios
+system
+.DS_Store
+.idea
+.env
+temp
